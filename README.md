@@ -138,14 +138,14 @@ interface IBuyer {
 `constructor(initialProducts: IProduct[] = [])` - принимает начальный массив товаров (опционально).
 
 Поля класса:
-`products: IProduct[]` - хранит массив всех товаров каталога.
+`products: IProduct[]` - хранит массив всех товаров каталога.  
 `selectedProduct: IProduct | null` - хранит товар, выбранный для подробного отображения.
 
 Методы класса:
-`setProducts(products: IProduct[]): void` - сохраняет массив товаров, полученный в параметрах.
-`getProducts(): IProduct[]` - возвращает массив всех товаров.
-`getProductById(id: string)`: IProduct | undefined - возвращает товар по его id.
-`setSelectedProduct(product: IProduct): void` - сохраняет товар для подробного отображения.
+`setProducts(products: IProduct[]): void` - сохраняет массив товаров, полученный в параметрах.  
+`getProducts(): IProduct[]` - возвращает массив всех товаров.  
+`getProductById(id: string): IProduct | undefined` - возвращает товар по его id.  
+`setSelectedProduct(product: IProduct): void` - сохраняет товар для подробного отображения.  
 `getSelectedProduct(): IProduct | null` - возвращает товар для подробного отображения.
 
 #### Класс Basket
@@ -159,28 +159,28 @@ interface IBuyer {
 `items: IProduct[]` - хранит массив товаров, выбранных покупателем.
 
 Методы класса:
-`getItems(): IProduct[]` - возвращает массив товаров в корзине.
-`addItem(product: IProduct): void` - добавляет товар в корзину.
-`removeItem(productId: string): void` - удаляет товар из корзины по id.
-`clear(): void` - очищает корзину.
-`getTotalPrice(): number` - возвращает общую стоимость всех товаров в корзине.
-`getItemsCount(): number` - возвращает количество товаров в корзине.
-`contains(productId: string): boolean` - проверяет наличие товара в корзине по id.
+`getItems(): IProduct[]` - возвращает массив товаров в корзине.  
+`addItem(product: IProduct): void` - добавляет товар в корзину.  
+`removeItem(productId: string): void` - удаляет товар из корзины по id.  
+`clear(): void` - очищает корзину.  
+`getTotalPrice(): number` - возвращает общую стоимость всех товаров в корзине.  
+`getItemsCount(): number` - возвращает количество товаров в корзине.  
+`contains(productId: string): boolean` - проверяет наличие товара в корзине по id.  
 
 #### Класс Buyer
 
 Управляет данными покупателя, обеспечивает их сохранение, валидацию и очистку.
 
 Конструктор:
-`constructor(initialData: Partial<IBuyer> = {})` - принимает начальные данные покупателя (опционально).
+`constructor(initialData: Partial<IBuyer> = {})` - принимает начальные данные покупателя (опционально).  
 
 Поля класса:
 `data: IBuyer` - хранит данные покупателя.
 
 Методы класса:
 `setData(field: keyof IBuyer, value: string): void`- сохраняет значение конкретного поля.
-`setAllData(data: IBuyer): void` - сохраняет все данные покупателя.
-`getData(): IBuyer` - возвращает все данные покупателя.
-`clear(): void` - очищает все данные покупателя.
-`validate(): ValidationResult` - проверяет валидность всех полей, возвращает объект с ошибками.
+`setAllData(data: IBuyer): void` - сохраняет все данные покупателя.  
+`getData(): IBuyer` - возвращает все данные покупателя.  
+`clear(): void` - очищает все данные покупателя.  
+`validate(): ValidationResult` - проверяет валидность всех полей, возвращает объект с ошибками.  
 
