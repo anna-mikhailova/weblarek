@@ -15,10 +15,15 @@ export interface IProduct {
   }
   
   export interface IBuyer {
-    payment: 'Онлайн' | 'При получении' | undefined;
+    payment: 'online' | 'upon receipt' | undefined;
     email: string;
     phone: string;
     address: string;
+  }
+
+  export interface IOrder extends IBuyer {
+    total: number;  
+    items: string[];    
   }
   
   export type ValidationResult = {
@@ -26,5 +31,10 @@ export interface IProduct {
     email?: string;
     phone?: string;
     address?: string;
+  }
+
+  export type OrderResult = {
+    id: string;     
+    total: number;  
   }
 

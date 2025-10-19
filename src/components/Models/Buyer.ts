@@ -1,7 +1,7 @@
 import { IBuyer, ValidationResult } from '../../types';
 
 export class Buyer {
-  private payment: 'Онлайн' | 'При получении' | undefined;
+  private payment: 'online' | 'upon receipt' | undefined;
   private email: string;
   private phone: string;
   private address: string;
@@ -13,7 +13,7 @@ export class Buyer {
     this.address = '';
   }
 
-  setPayment(payment: 'Онлайн' | 'При получении'): void {
+  setPayment(payment: 'online' | 'upon receipt'): void {
     this.payment = payment;
   }
 
@@ -29,7 +29,7 @@ export class Buyer {
     this.address = address;
   }
 
-  setAllData(payment: 'Онлайн' | 'При получении', email: string, phone: string, address: string): void {
+  setAllData(payment: 'online' | 'upon receipt', email: string, phone: string, address: string): void {
     this.payment = payment;
     this.email = email;
     this.phone = phone;

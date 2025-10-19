@@ -106,12 +106,12 @@ Presenter - презентер содержит основную логику п
 
 ```
 interface IProduct {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
+  id: string;           // Уникальный идентификатор товара
+  description: string;  // Подробное описание товара
+  image: string;        // URL изображения товара
+  title: string;        // Название товара
+  category: string;     // Категория товара
+  price: number | null; // Цена товара (может быть null если цена не установлена)
 }
 ```
 
@@ -121,11 +121,22 @@ interface IProduct {
 
 ```
 interface IBuyer {
-  payment: 'Онлайн' | 'При получении' | undefined;;
-  email: string;
-  phone: string;
-  address: string;
+  payment: 'Онлайн' | 'При получении' | undefined; // Способ оплаты (только два допустимых значения)
+  email: string;    // Электронная почта для связи и отправки уведомлений
+  phone: string;    // Номер телефона для связи
+  address: string;  // Адрес доставки заказа
 }
+```
+
+#### Интерфейс IOrder 
+
+Описывает структуру данных заказа. Включает контактную информацию из IBuyer и данные заказа по стоимости и составу.
+
+```
+  export interface IOrder extends IBuyer {
+    total: number;      // Общая стоимость заказа
+    items: string[];    // Массив идентификаторов товаров в заказе
+  }
 ```
 
 ### Модели Данных
@@ -175,7 +186,7 @@ interface IBuyer {
 `constructor()` - создает объект с пустыми данными покупателя.  
 
 Поля класса:  
-`payment: 'Онлайн' | 'При получении' | undefined` - способ оплаты  
+`payment: 'online' | 'upon receipt' | undefined` - способ оплаты  
 `email: string` - электронная почта  
 `phone: string` - номер телефона  
 `address: string` - адрес доставки  
@@ -189,4 +200,20 @@ interface IBuyer {
 `getData(): IBuyer` - возвращает все данные покупателя  
 `clear(): void` - очищает все данные покупателя  
 `validate(): ValidationResult` - проверяет валидность всех полей, возвращает объект с ошибками.  
+
+### Слой коммуникации
+
+#### Класс WebLarekApi
+
+Отвечает за взаимодействие с сервером приложения «Веб-ларек». Использует композицию с классом Api для выполнения HTTP-запросов к серверу.
+
+Конструктор:  
+`constructor(api: IApi)` - принимает экземпляр класса, реализующего интерфейс IApi.
+
+Поля класса:  
+`protected api: IApi` - экземпляр класса для выполнения HTTP-запросов.
+
+Методы класса:  
+`getProductList(): Promise<IProduct[]>` - выполняет GET запрос к серверу для получения списка товаров. Возвращает промис с массивом товаров.  
+`postOrder(order: IOrder): Promise<OrderResult>` - выполняет POST запрос для отправки данных заказа. Возвращает промис с результатом оформления заказа.
 

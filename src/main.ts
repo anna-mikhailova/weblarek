@@ -2,6 +2,9 @@ import { ProductList } from './components/Models/ProductList';
 import { Basket } from './components/Models/Basket';
 import { Buyer } from './components/Models/Buyer';
 import { apiProducts } from './utils/data';
+import { Api } from './components/base/Api';
+import { WebLarekApi } from './components/base/WebLarekApi';
+import { API_URL } from './utils/constants';
 
 // Тестирование ProductList
 console.log('=== Тест ProductList ===');
@@ -43,7 +46,7 @@ const buyerModel = new Buyer();
 buyerModel.setEmail('test@example.com');
 buyerModel.setPhone('+79991234567');
 buyerModel.setAddress('ул. Примерная, д. 1');
-buyerModel.setPayment('Онлайн');
+buyerModel.setPayment('online');
 
 console.log('Данные покупателя:', buyerModel.getData());
 console.log('Валидация полных данных:', buyerModel.validate());
@@ -61,15 +64,49 @@ const invalidEmailBuyer = new Buyer();
 invalidEmailBuyer.setEmail('invalid-email');
 invalidEmailBuyer.setPhone('+79991234567');
 invalidEmailBuyer.setAddress('ул. Примерная, д. 1');
-invalidEmailBuyer.setPayment('При получении');
+invalidEmailBuyer.setPayment('upon receipt');
 console.log('Валидация с некорректным email:', invalidEmailBuyer.validate());
 
 // Тестирование setAllData
 console.log('\n=== Тестирование setAllData ===');
 const newBuyer = new Buyer();
-newBuyer.setAllData('При получении', 'new@example.com', '+79998887766', 'ул. Новая, д. 5');
+newBuyer.setAllData('upon receipt', 'new@example.com', '+79998887766', 'ул. Новая, д. 5');
 console.log('Данные после setAllData:', newBuyer.getData());
 
 // Очистка данных покупателя
 buyerModel.clear();
 console.log('\nПосле очистки данных покупателя:', buyerModel.getData());
+
+// Тестирование API
+console.log('\n=== Тестирование API ===');
+
+// Создаем экземпляр базового API
+const baseApi = new Api(API_URL);
+
+// Создаем экземпляр API для веб-ларка
+const webLarekApi = new WebLarekApi(baseApi);
+
+// Создаем модель каталога товаров
+const newProductsModel = new ProductList();
+
+// Получаем товары с сервера и сохраняем в модель
+webLarekApi.getProductList()
+  .then(products => {
+    console.log('Получены товары с сервера:', products);
+    
+    // Сохраняем товары в модель
+    newProductsModel.setProducts(products);
+    
+    // Проверяем, что товары сохранились в модели
+    console.log('Товары в модели после сохранения:', newProductsModel.getProducts());
+    console.log('Количество товаров в каталоге:', newProductsModel.getProducts().length);
+    
+    // Тестируем получение товара по ID
+    if (products.length > 0) {
+      const firstProductId = products[0].id;
+      console.log('Первый товар по ID:', newProductsModel.getProductById(firstProductId));
+    }
+  })
+  .catch(error => {
+    console.error('Ошибка при получении товаров:', error);
+  });
