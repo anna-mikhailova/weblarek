@@ -1,3 +1,4 @@
+import './scss/styles.scss';
 import { ProductList } from './components/Models/ProductList';
 import { Basket } from './components/Models/Basket';
 import { Buyer } from './components/Models/Buyer';
