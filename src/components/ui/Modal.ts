@@ -20,19 +20,16 @@ export class Modal implements IModal {
 
     this.closeButton.addEventListener("click", () => {
       this.events.emit("modal:close");
-      this.isOpen = false;
     });
     this.container.addEventListener("click", (event) => {
       if (event.target === this.container) {
         this.events.emit("modal:close");
-        this.isOpen = false;
       }
     });
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         this.events.emit("modal:close");
-        this.isOpen = false;
       }
     });
   }

@@ -122,6 +122,7 @@ export class AppPresenter {
     // Модальное окно закрыто
     this.events.on("modal:close", () => {
       this.productList.setSelectedProduct(null);
+      this.modal.isOpen = false;
     });
 
     // Клик на иконку корзины
