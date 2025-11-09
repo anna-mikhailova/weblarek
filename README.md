@@ -487,24 +487,23 @@ interface IBuyer {
 Конструктор:  
 ```
 constructor(
-  productList: IProductListModel, // Модель продуктов
-  basket: IBasketModel, // Модель карзины
-  buyer: IBuyerModel, / Модель покупателя
-  api: IWebLarekApi, // API клиент
-  events: IEvents, // Брокер событий
-  header: IHeader, // Компонент шапки
-  gallery: IGallery, // Компонент галереи
-  basketView: IBasketView, // Компонент корзины
-  modal: IModal, // Компонент модального окна
-  orderForm: IOrderForm, // Форма заказа - сбор способа оплаты и адреса доставки
-  contactsForm: IContactsForm, // Форма контактов - сбор email и телефона покупателя
-  successView: ISuccess, // Компонент окна успешного оформления товара
+  productList: IProductListModel,     // Модель продуктов
+  basket: IBasketModel,               // Модель карзины
+  buyer: IBuyerModel,                 // Модель покупателя
+  api: IWebLarekApi,                  // API клиент
+  events: IEvents,                    // Брокер событий
+  header: IHeader,                    // Компонент шапки
+  gallery: IGallery,                  // Компонент галереи
+  basketView: IBasketView,            // Компонент корзины
+  modal: IModal,                      // Компонент модального окна
+  orderForm: IOrderForm,              // Форма заказа - сбор способа оплаты и адреса доставки
+  contactsForm: IContactsForm,        // Форма контактов - сбор email и телефона покупателя
   CatalogCardConstructor: new (container: HTMLElement, actions?: ICardActions) => ICatalogCard, 
-  // Конструктореый тип для создания карточек каталога
+                                      // Конструктореый тип для создания карточек каталога
   PreviewCardConstructor: new (container: HTMLElement, actions?: ICardActions) => IPreviewCard,
-  // Конструктореый тип для создания карточек превью
+                                      // Конструктореый тип для создания карточек превью
   BasketCardConstructor: new (container: HTMLElement, actions?: ICardActions) => IBasketCard
-  // Конструктореый тип для создания карточек корзины
+                                      // Конструктореый тип для создания карточек корзины
 )
 ```
 Презентер получает все зависимости через конструктор  
