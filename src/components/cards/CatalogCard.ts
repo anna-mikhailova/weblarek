@@ -1,20 +1,40 @@
-import { Card } from "../base/Card";
-import { IEvents } from "../base/Events";
-import { ICatalogCard, ICatalogCardData } from "../../types";
+import { Card } from "../uibase/Card";
+import { categoryMap } from "../../utils/constants";
+import { ensureElement } from "../../utils/utils";
+import { ICatalogCard, ICatalogCardData, ICardActions } from "../../types";
 
 export class CatalogCard
   extends Card<ICatalogCardData>
   implements ICatalogCard
 {
-  constructor(container: HTMLElement, protected events: IEvents) {
+  protected categoryElement: HTMLElement;
+  protected imageElement: HTMLImageElement;
+
+  constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
 
-    this.container.addEventListener("click", () => {
-      this.events.emit("card:select", { id: this.container.dataset.id });
-    });
+    this.categoryElement = ensureElement<HTMLElement>(
+      ".card__category",
+      this.container
+    );
+    this.imageElement = ensureElement<HTMLImageElement>(
+      ".card__image",
+      this.container
+    );
+
+    if (actions?.onCatalogCardClick) {
+      this.container.addEventListener("click", actions.onCatalogCardClick);
+    }
   }
 
-  set id(value: string) {
-    this.container.dataset.id = value;
+  set category(value: string) {
+    this.categoryElement.textContent = value;
+    const className =
+      (categoryMap as Record<string, string>)[value] || categoryMap["другое"];
+    this.categoryElement.className = `card__category ${className}`;
+  }
+
+  set image(value: { src: string; alt: string }) {
+    this.setImage(this.imageElement, value.src, value.alt);
   }
 }

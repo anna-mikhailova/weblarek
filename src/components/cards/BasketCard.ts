@@ -1,29 +1,29 @@
-import { Card } from "../base/Card";
-import { IEvents } from "../base/Events";
-import { IBasketCard, IBasketCardData } from "../../types";
+import { Card } from "../uibase/Card";
+import { IBasketCard, IBasketCardData, ICardActions } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 export class BasketCard extends Card<IBasketCardData> implements IBasketCard {
-  protected deleteButton: HTMLButtonElement | null;
-  protected indexElement: HTMLElement | null;
+  protected deleteButton: HTMLButtonElement;
+  protected indexElement: HTMLElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {
+  constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
-    this.deleteButton = this.container.querySelector(".basket__item-delete");
-    this.indexElement = this.container.querySelector(".basket__item-index");
 
-    this.deleteButton?.addEventListener("click", (event) => {
-      event.stopPropagation();
-      this.events.emit("basket:remove", { id: this.container.dataset.id });
-    });
-  }
+    this.deleteButton = ensureElement<HTMLButtonElement>(
+      ".basket__item-delete",
+      this.container
+    );
+    this.indexElement = ensureElement<HTMLElement>(
+      ".basket__item-index",
+      this.container
+    );
 
-  set id(value: string) {
-    this.container.dataset.id = value;
+    if (actions?.onRemoveFromBasket) {
+      this.deleteButton?.addEventListener("click", actions.onRemoveFromBasket!);
+    }
   }
 
   set index(value: number) {
-    if (this.indexElement) {
-      this.indexElement.textContent = value.toString();
-    }
+    this.indexElement.textContent = value.toString();
   }
 }

@@ -1,44 +1,47 @@
-import { IEvents } from '../base/Events';
-import { IModal } from '../../types';
+import { IEvents } from "../base/Events";
+import { IModal } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 export class Modal implements IModal {
-    private container: HTMLElement;
-    private contentElement: HTMLElement;
-    private closeButton: HTMLButtonElement;
+  private container: HTMLElement;
+  private contentElement: HTMLElement;
+  private closeButton: HTMLButtonElement;
 
-    constructor(containerId: string, private events: IEvents) {
-        this.container = document.getElementById(containerId) as HTMLElement;
-        this.contentElement = this.container.querySelector('.modal__content') as HTMLElement;
-        this.closeButton = this.container.querySelector('.modal__close') as HTMLButtonElement;
+  constructor(containerId: string, private events: IEvents) {
+    this.container = document.getElementById(containerId) as HTMLElement;
+    this.contentElement = ensureElement<HTMLElement>(
+      ".modal__content",
+      this.container
+    );
+    this.closeButton = ensureElement<HTMLButtonElement>(
+      ".modal__close",
+      this.container
+    );
 
-        this.closeButton.addEventListener('click', () => this.close());
-        this.container.addEventListener('click', (event) => {
-            if (event.target === this.container) {
-                this.close();
-            }
-        });
+    this.closeButton.addEventListener("click", () => {
+      this.events.emit("modal:close");
+      this.isOpen = false;
+    });
+    this.container.addEventListener("click", (event) => {
+      if (event.target === this.container) {
+        this.events.emit("modal:close");
+        this.isOpen = false;
+      }
+    });
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                this.close();
-            }
-        });
-    }
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        this.events.emit("modal:close");
+        this.isOpen = false;
+      }
+    });
+  }
 
-    open(content?: HTMLElement) {
-        if (content) {
-            this.setContent(content);
-        }
-        this.container.classList.add('modal_active');
-        this.events.emit('modal:open');
-    }
+  set content(content: HTMLElement) {
+    this.contentElement.replaceChildren(content);
+  }
 
-    close() {
-        this.container.classList.remove('modal_active');
-        this.events.emit('modal:close');
-    }
-
-    setContent(content: HTMLElement) {
-        this.contentElement.replaceChildren(content);
-    }
+  set isOpen(value: boolean) {
+    this.container.classList.toggle("modal_active", value);
+  }
 }

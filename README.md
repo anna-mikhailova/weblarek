@@ -159,6 +159,10 @@ interface IBuyer {
 `setSelectedProduct(product: IProduct): void` - сохраняет товар для подробного отображения.  
 `getSelectedProduct(): IProduct | null` - возвращает товар для подробного отображения.
 
+События:  
+`productModel:setProducts` - при обновлении списка товаров  
+`productModel:setSelected` - при выборе товара для просмотра  
+
 #### Класс Basket
 
 Управляет товарами, выбранными пользователем для покупки. Обеспечивает добавление, удаление, подсчет стоимости и количества товаров в корзине.
@@ -178,6 +182,10 @@ interface IBuyer {
 `getItemsCount(): number` - возвращает количество товаров в корзине.  
 `contains(productId: string): boolean` - проверяет наличие товара в корзине по id.  
 
+События:  
+`basketModel:addItem` - при добавлении товара  
+`basketModel:removeItem` - при удалении товара  
+
 #### Класс Buyer
 
 Управляет данными покупателя, обеспечивает их сохранение, валидацию и очистку.
@@ -196,10 +204,15 @@ interface IBuyer {
 `setEmail(email: string): void` - устанавливает электронную почту  
 `setPhone(phone: string): void` - устанавливает номер телефона  
 `setAddress(address: string): void` - устанавливает адрес доставки  
-`setAllData(payment: 'Онлайн' | 'При получении', email: string, phone: string, address: string): void` - устанавливает все данные покупателя за один вызов  
 `getData(): IBuyer` - возвращает все данные покупателя  
 `clear(): void` - очищает все данные покупателя  
-`validate(): ValidationResult` - проверяет валидность всех полей, возвращает объект с ошибками.  
+`validate(): ValidationResult` - проверяет валидность всех полей, возвращает объект с ошибками. 
+
+События:  
+`buyerModel:setPayment` - при изменении способа оплаты  
+`buyerModel:setEmail` - при изменении email  
+`buyerModel:setPhone` - при изменении телефона  
+`buyerModel:setAddress` - при изменении адреса   
 
 ### Слой коммуникации
 
@@ -215,8 +228,10 @@ interface IBuyer {
 
 Методы класса:  
 `getProductList(): Promise<IProduct[]>` - выполняет GET запрос к серверу для получения списка товаров. Возвращает промис с массивом товаров.  
-`postOrder(order: IOrder): Promise<OrderResult>` - выполняет POST запрос для отправки данных заказа. Возвращает промис с результатом оформления заказа.
-Отличная работа по структурированию кода! Продолжим документацию, сосредоточившись на слое представления (View) и событиях.
+`postOrder(order: IOrder): Promise<OrderResult>` - выполняет POST запрос для отправки данных заказа. Возвращает промис с результатом оформления заказа.  
+
+События:  
+`api:ordrePosted` - при успешном оформлении заказа  
 
 ### Слой представления (View)
 
@@ -232,15 +247,11 @@ interface IBuyer {
 `constructor(container: HTMLElement)` - принимает контейнер, в котором будет отображаться карточка.  
 
 Поля:  
-- `categoryElement: HTMLElement | null` - элемент для отображения категории  
-- `titleElement: HTMLElement | null` - элемент для отображения названия  
-- `imageElement: HTMLImageElement | null` - элемент для отображения изображения  
-- `priceElement: HTMLElement | null` - элемент для отображения цены  
+- `titleElement: HTMLElement` - элемент для отображения названия  
+- `priceElement: HTMLElement` - элемент для отображения цены  
 
 Сеттеры:  
-- `set category(value: string)` - устанавливает категорию и применяет соответствующий стиль из `categoryMap`  
 - `set title(value: string)` - устанавливает название товара  
-- `set image(value: { src: string; alt: string })` - устанавливает изображение товара  
 - `set price(value: number)` - устанавливает цену с форматированием  
 
 ##### `Form<T>` - абстрактный класс для форм
@@ -254,15 +265,13 @@ interface IBuyer {
 
 Поля:  
 - `formElement: HTMLFormElement` - элемент формы  
-- `submitButton: HTMLButtonElement | null` - кнопка отправки формы  
-- `errorsElement: HTMLElement | null` - элемент для отображения ошибок  
+- `submitButton: HTMLButtonElement` - кнопка отправки формы  
+- `errorsElement: HTMLElement` - элемент для отображения ошибок  
 
 Сеттеры:  
-- `set errors(value: string[])` - отображает ошибки валидации  
-- `set valid(value: boolean)` - управляет состоянием кнопки отправки (активна/неактивна)  
-
-Абстрактные методы:  
-- `validate(): boolean` - метод для валидации формы, должен быть реализован в дочерних классах
+- `set errors(value: string)` - отображает ошибки валидации  
+- `set buttonText(value: string)` - отображает текст кнопки  
+- `set buttonDisabledOption(value: boolean)` - управляет состоянием кнопки  
 
 #### Конкретные классы карточек
 
@@ -270,61 +279,65 @@ interface IBuyer {
 Наследует: `Card<CatalogCardData>`  
 Реализует: `ICatalogCard`  
 
-Назначение: Отображает товар в каталоге. При клике на карточку генерирует событие `card:select`.  
+Назначение: Отображает товар в каталоге.  
 
 Конструктор:  
-`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
+`constructor(container: HTMLElement, actions?: ICardActions)` - принимает контейнер и коллбэк.  
 
-Дополнительные методы:  
-- `set id(value: string)` - устанавливает идентификатор товара в data-атрибут контейнера
+Дополнительные поля:  
+- `categoryElement: HTMLElement` - элемент для отображения категории товара  
+- `imageElement: HTMLImageElement` - элемент для отображения картинки товара  
 
-Обработка событий:  
-- При клике на карточку генерируется событие `card:select` с идентификатором товара.  
+Сеттеры:  
+- `set category(value: string)` - отображает категорию товара
+- `image(value: { src: string; alt: string })` - отображает картинку товара
+
+События:  
+- При клике на карточки вызывается колбэк `onCatalogCardClick`   
 
 ##### `PreviewCard` - карточка предпросмотра товара
 Наследует: `Card<PreviewCardData>`  
 Реализует: `IPreviewCard`  
 
-Назначение: Отображает детальную информацию о товаре в модальном окне. Позволяет добавлять товар в корзину или удалять его из корзины.  
+Назначение: Отображает детальную информацию о товаре в модальном окне. 
 
 Конструктор:  
-`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
+`constructor(container: HTMLElement, actions?: ICardActions)` - принимает контейнер и коллбэк.  
 
 Дополнительные поля:  
-- `buttonElement: HTMLButtonElement | null` - кнопка для добавления/удаления товара в корзине  
-- `descriptionElement: HTMLElement | null` - элемент для отображения описания товара  
+- `buttonElement: HTMLButtonElement` - кнопка для добавления/удаления товара в корзине  
+- `descriptionElement: HTMLElement` - элемент для отображения описания товара  
+- `categoryElement: HTMLElement` - элемент для отображения категории товара  
+- `imageElement: HTMLImageElement` - элемент для отображения картинки товара  
 
 Дополнительные сеттеры:  
-- `set id(value: string)` - устанавливает идентификатор товара  
+- `set category(value: string)` - устанавливает категорию товара  
 - `set description(value: string)` - устанавливает описание товара  
-- `set inBasket(value: boolean)` - устанавливает статус наличия товара в корзине и обновляет кнопку  
-- `set price(value: number)` - переопределяет метод для обновления кнопки при изменении цены  
+- `set image(value: { src: string; alt: string })` - устанавливает изображение товара  
+- `set buttonText(value: string)` - устанавливает текст кнопка  
+- `set buttonDisabledOption(value: boolean)` - устанавливает свойство кнопки  
 
-Приватные методы:  
-- `updateButton()` - обновляет текст и состояние кнопки в зависимости от цены и статуса корзины  
-
-Обработка событий:  
-- При клике на кнопку генерируется событие `card:addToBasket` или `basket:remove` в зависимости от текущего состояния.  
+События:  
+- При клике на кнопку вызывается колбэк `onPreviewCardBasketClick`   
 
 ##### `BasketCard` - карточка товара в корзине
 Наследует: `Card<BasketCardData>`  
 Реализует: `IBasketCard`  
 
-Назначение: Отображает товар в корзине. Позволяет удалить товар из корзины.  
+Назначение: Отображает товар в корзине.  
 
 Конструктор:  
-`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
+`constructor(container: HTMLElement, actions?: ICardActions)` - принимает контейнер и экземпляр брокера событий.  
 
 Дополнительные поля:  
-- `deleteButton: HTMLButtonElement | null` - кнопка удаления товара из корзины  
-- `indexElement: HTMLElement | null` - элемент для отображения порядкового номера товара
+- `deleteButton: HTMLButtonElement` - кнопка удаления товара из корзины  
+- `indexElement: HTMLElement` - элемент для отображения порядкового номера товара  
 
 Дополнительные сеттеры:  
-- `set id(value: string)` - устанавливает идентификатор товара  
 - `set index(value: number)` - устанавливает порядковый номер товара в корзине  
 
-Обработка событий:  
-- При клике на кнопку удаления генерируется событие `basket:remove` с идентификатором товара.
+События:  
+- При клике на кнопку удаления выполняется колбэк `onRemoveFromBasket`.  
 
 #### Классы форм
 
@@ -339,19 +352,16 @@ interface IBuyer {
 
 Поля:  
 - `paymentButtons: NodeListOf<HTMLButtonElement>` - кнопки выбора способа оплаты  
-- `addressInput: HTMLInputElement | null` - поле ввода адреса  
-- `selectedPayment: string` - выбранный способ оплаты  
+- `addressInput: HTMLInputElement` - поле ввода адреса  
 
 Сеттеры:  
 - `set payment(value: string)` - устанавливает способ оплаты  
 - `set address(value: string)` - устанавливает адрес доставки  
 
-Методы:  
-- `setPayment(method: string)` - выбирает способ оплаты и обновляет UI  
-- `validate(): boolean` - проверяет, выбран ли способ оплаты и введен ли адрес  
-
-Обработка событий:  
-- При отправке формы генерируется событие `order:submit` с данными о способе оплаты и адресе.  
+События:  
+- `order:selectPayment` - при выборе способа оплаты  
+- `order:addressInput` - при введении адреса  
+- `order:submit` - при сабмите формы  
 
 ##### `ContactsForm` - форма ввода контактных данных
 Наследует: `Form<ContactsFormData>`  
@@ -360,21 +370,20 @@ interface IBuyer {
 Назначение: Форма для ввода email и телефона покупателя.  
 
 Конструктор:  
-`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
 
 Поля:  
-- `emailInput: HTMLInputElement | null` - поле ввода email  
-- `phoneInput: HTMLInputElement | null` - поле ввода телефона  
+- `emailInput: HTMLInputElement` - поле ввода email  
+- `phoneInput: HTMLInputElement` - поле ввода телефона  
 
 Сеттеры:  
 - `set email(value: string)` - устанавливает email  
 - `set phone(value: string)` - устанавливает телефон  
 
-Методы:  
-- `validate(): boolean` - проверяет корректность email и телефона с помощью регулярных выражений  
-
-Обработка событий:  
-- При отправке формы генерируется событие `contacts:submit` с данными email и телефона.
+События:  
+- `contacts:emailInput` - при введении email-а  
+- `contacts:phoneInput` - при введении телефона  
+- `contacts:submit` - при сабмите формы  
 
 #### Другие UI компоненты
 
@@ -385,20 +394,20 @@ interface IBuyer {
 Назначение: Отображает список товаров в корзине, общую сумму и кнопку оформления заказа.  
 
 Конструктор:  
-`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
 
 Поля:  
-- `listElement: HTMLElement | null` - элемент списка товаров  
-- `totalElement: HTMLElement | null` - элемент для отображения общей суммы  
-- `buttonElement: HTMLButtonElement | null` - кнопка оформления заказа  
+- `listElement: HTMLElement` - элемент списка товаров  
+- `totalElement: HTMLElement` - элемент для отображения общей суммы  
+- `buttonElement: HTMLButtonElement` - кнопка оформления заказа  
 
 Сеттеры:  
 - `set items(value: HTMLElement[])` - отображает список товаров в корзине  
 - `set total(value: number)` - отображает общую сумму  
 - `set disabled(value: boolean)` - управляет состоянием кнопки оформления заказа  
 
-Обработка событий:  
-- При клике на кнопку оформления заказа генерируется событие `basket:order`.
+События  
+- `basket:order` - при клике на кнопку чтобы оформить заказ  
 
 ##### `Gallery` - компонент галереи товаров
 Наследует: `Component<GalleryData>`  
@@ -410,7 +419,7 @@ interface IBuyer {
 `constructor(container: HTMLElement)` - принимает контейнер.  
 
 Сеттер:  
-- `set items(value: HTMLElement[])` - отображает переданные элементы (карточки товаров) в галерее
+- `set items(value: HTMLElement[])` - отображает переданные элементы (карточки товаров) в галерее  
 
 ##### `Header` - компонент шапки
 Наследует: `Component<HeaderData>`  
@@ -422,14 +431,14 @@ interface IBuyer {
 `constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
 
 Поля:  
-- `basketButton: HTMLButtonElement | null` - кнопка корзины  
-- `counterElement: HTMLElement | null` - элемент для отображения счетчика  
+- `basketButton: HTMLButtonElement` - кнопка корзины  
+- `counterElement: HTMLElement` - элемент для отображения счетчика  
 
 Сеттер:  
-- `set counter(value: number)` - устанавливает значение счетчика товаров в корзине
+- `set counter(value: number)` - устанавливает значение счетчика товаров в корзине  
 
-Обработка событий:  
-- При клике на кнопку корзины генерируется событие `header:basketClick`.
+События:  
+- `header:basketClick` - при клике на кнопку корзины  
 
 ##### `Modal` - компонент модального окна
 Реализует: `IModal`  
@@ -444,13 +453,12 @@ interface IBuyer {
 - `contentElement: HTMLElement` - элемент для содержимого модального окна  
 - `closeButton: HTMLButtonElement` - кнопка закрытия модального окна  
 
-Методы:  
-- `open(content?: HTMLElement)` - открывает модальное окно, при необходимости устанавливает содержимое  
-- `close()` - закрывает модальное окно  
-- `setContent(content: HTMLElement)` - устанавливает содержимое модального окна  
+Сеттеры:  
+- `set content(content: HTMLElement)` - устанавливает содержимое модального окна   
+- `set isOpen(value: boolean)` - управляет классами для открытия модального окна  
 
-Обработка событий:  
-- Генерирует события `modal:open` и `modal:close` при открытии и закрытии модального окна.
+События:  
+- `modal:close` при закрытии модального окна
 
 ##### `Success` - компонент успешного оформления заказа
 Наследует: `Component<SuccessData>`  
@@ -462,28 +470,14 @@ interface IBuyer {
 `constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и экземпляр брокера событий.  
 
 Поля:  
-- `descriptionElement: HTMLElement | null` - элемент для отображения сообщения  
-- `closeButton: HTMLButtonElement | null` - кнопка закрытия  
+- `descriptionElement: HTMLElement` - элемент для отображения сообщения  
+- `closeButton: HTMLButtonElement` - кнопка закрытия  
 
 Сеттер:  
 - `set total(value: number)` - устанавливает сумму заказа в сообщение  
 
-Обработка событий:  
-- При клике на кнопку закрытия генерируется событие `success:close`.  
-
-### Фабрика компонентов
-
-#### `ComponentFactory` - фабрика для создания компонентов представления
-Назначение: Создает экземпляры компонентов представления. Использует шаблоны из HTML для создания DOM-элементов.  
-
-Методы:  
-- `createCard(type: 'catalog' | 'preview' | 'basket', templateId: string, events: IEvents): ICatalogCard | IPreviewCard | IBasketCard` - создает карточку указанного типа  
-- `createForm(type: 'order' | 'contacts', templateId: string, events: IEvents): IOrderForm | IContactsForm` - создает форму указанного типа  
-- `createBasket(templateId: string, events: IEvents): IBasketView` - создает компонент корзины  
-- `createSuccess(templateId: string, events: IEvents): ISuccess` - создает компонент успешного заказа  
-- `createHeader(container: HTMLElement, events: IEvents): IHeader` - создает компонент шапки  
-- `createGallery(container: HTMLElement): IGallery` - создает компонент галереи  
-- `createModal(containerId: string, events: IEvents): IModal` - создает компонент модального окна  
+События:  
+- `success:close` - при клике на кнопку возвращения к покупкам
 
 ### Презентер
 
@@ -491,21 +485,42 @@ interface IBuyer {
 Назначение: Координирует взаимодействие между моделями и представлениями. Обрабатывает события и управляет состоянием приложения.  
 
 Конструктор:  
-`constructor(productList: ProductList, basket: Basket, buyer: Buyer, api: WebLarekApi, events: EventEmitter)` - принимает экземпляры моделей, API и брокера событий.  
+```
+constructor(
+  productList: IProductListModel, // Модель продуктов
+  basket: IBasketModel, // Модель карзины
+  buyer: IBuyerModel, / Модель покупателя
+  api: IWebLarekApi, // API клиент
+  events: IEvents, // Брокер событий
+  header: IHeader, // Компонент шапки
+  gallery: IGallery, // Компонент галереи
+  basketView: IBasketView, // Компонент корзины
+  modal: IModal, // Компонент модального окна
+  orderForm: IOrderForm, // Форма заказа - сбор способа оплаты и адреса доставки
+  contactsForm: IContactsForm, // Форма контактов - сбор email и телефона покупателя
+  successView: ISuccess, // Компонент окна успешного оформления товара
+  CatalogCardConstructor: new (container: HTMLElement, actions?: ICardActions) => ICatalogCard, 
+  // Конструктореый тип для создания карточек каталога
+  PreviewCardConstructor: new (container: HTMLElement, actions?: ICardActions) => IPreviewCard,
+  // Конструктореый тип для создания карточек превью
+  BasketCardConstructor: new (container: HTMLElement, actions?: ICardActions) => IBasketCard
+  // Конструктореый тип для создания карточек корзины
+)
+```
+Презентер получает все зависимости через конструктор  
 
-Основные функции:  
-- Инициализация всех компонентов через фабрику  
-- Подписка на события от представлений  
-- Обработка бизнес-логики приложения  
-- Обновление состояния приложения в ответ на действия пользователя  
-- Координация данных между моделями и представлениями  
+Основной поток данных:  
+Загрузка товаров - loadProducts() → api.getProductList()  
+Рендеринг каталога - renderProducts() создает карточки через конструкторы  
+Обработка действий пользователя через систему событий  
+Синхронизация состояния между моделями и представлениями  
 
 Ключевые методы:  
-- `initializeViews()` - создает все компоненты представления через фабрику  
-- `subscribeToEvents()` - настраивает обработчики для всех событий приложения  
-- `loadProducts()` - загружает товары с сервера и сохраняет в модель  
-- `renderProducts()` - отображает товары в каталоге  
-- Обработчики событий: `card:select`, `card:addToBasket`, `basket:remove`, `header:basketClick`, `basket:order`, `order:submit`, `contacts:submit`, `success:close`, `modal:close`  
+- `renderProducts(products)` - отрисовка каталога товаров  
+- `openProductPreview(product)` - открытие карточки товара  
+- `openBasket()` - открытие корзины  
+- `openOrderForm()`, `openContactsForm() `- навигация по формам  
+- `processOrder()` - отправка заказа на сервер  
 
 Жизненный цикл приложения:  
 1. Инициализация - создание моделей, представлений и настройка событий  
@@ -515,18 +530,22 @@ interface IBuyer {
 
 ### События приложения
 
-#### Основные события:
-
-- `card:select` - выбор товара для просмотра деталей  
-- `card:addToBasket` - добавление товара в корзину  
-- `basket:remove` - удаление товара из корзины  
-- `header:basketClick` - клик по иконке корзины в шапке  
-- `basket:order` - начало оформления заказа из корзины  
-- `order:submit` - отправка данных первого шага заказа  
-- `contacts:submit` - отправка контактных данных  
-- `success:close` - закрытие окна успешного заказа  
-- `modal:open` - открытие модального окна  
-- `modal:close` - закрытие модального окна  
+#### Основные события:  
+- `productModel:setProducts` -	Обновление списка товаров в модели  
+- `productModel:setSelected`	-	Выбор товара для просмотра в модели  
+- `basketModel:addItem` -	Добавление товара в корзину в модели  
+- `basketModel:removeItem` -	Удаление товара из корзины в модели  
+- `header:basketClick`	- Клик на кнопку открытия корзины  
+- `basket:order`	-	Клик на кнопку оформления заказа в корзине  
+- `order:selectPayment`	- Выбор способа оплаты в форме  
+- `order:addressInput`-	Ввод адреса доставки в форме  
+- `order:submit` -	Отправка формы заказа с первой частью формы  
+- `contacts:emailInput`	- Ввод email  
+- `contacts:phoneInput`	- Ввод телефона  
+- `contacts:submit`	-	Отправка формы контактов (второй части формы)  
+- `api:ordrePosted`	-	Успешное отправление данных по заказу на сервер  
+- `modal:close` -	Управление модальным окном  
+- `success:close`	-	Закрытие окна успеха  
 
 Каждое событие содержит данные, необходимые для обработки действия, и обрабатывается презентером для обновления состояния приложения.  
 

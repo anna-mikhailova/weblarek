@@ -1,18 +1,17 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { IHeader, IHeaderData } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 export class Header extends Component<IHeaderData> implements IHeader {
-  private basketButton: HTMLButtonElement | null;
-  private counterElement: HTMLElement | null;
+  private basketButton: HTMLButtonElement;
+  private counterElement: HTMLElement;
 
   constructor(container: HTMLElement, private events: IEvents) {
     super(container);
 
-    this.basketButton = this.container.querySelector(".header__basket");
-    this.counterElement = this.container.querySelector(
-      ".header__basket-counter"
-    );
+    this.basketButton = ensureElement<HTMLButtonElement>(".header__basket", this.container);
+    this.counterElement = ensureElement<HTMLElement>(".header__basket-counter", this.container);
 
     this.basketButton?.addEventListener("click", () => {
       this.events.emit("header:basketClick");
@@ -20,8 +19,6 @@ export class Header extends Component<IHeaderData> implements IHeader {
   }
 
   set counter(value: number) {
-    if (this.counterElement) {
-      this.counterElement.textContent = value.toString();
-    }
+    this.counterElement.textContent = value.toString();
   }
 }

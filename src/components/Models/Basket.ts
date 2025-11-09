@@ -1,10 +1,13 @@
-import { IProduct } from '../../types';
+import { IProduct, IBasketModel } from "../../types";
+import { IEvents } from "../base/Events";
 
-export class Basket {
+export class Basket implements IBasketModel {
   private items: IProduct[];
+  private events: IEvents;
 
-  constructor() {
+  constructor(events: IEvents) {
     this.items = [];
+    this.events = events;
   }
 
   getItems(): IProduct[] {
@@ -13,22 +16,21 @@ export class Basket {
 
   addItem(product: IProduct): void {
     this.items.push(product);
+    this.events.emit("basketModel:addItem");
   }
 
   removeItem(productId: string): void {
-    this.items = this.items.filter(item => item.id !== productId);
+    this.items = this.items.filter((item) => item.id !== productId);
+    this.events.emit("basketModel:removeItem");
   }
 
   clear(): void {
     this.items = [];
+    this.events.emit("basketModel:removeItem");
   }
 
   getTotalPrice(): number {
-    let total = 0;
-    for (const item of this.items) {
-      total += item.price || 0;
-    }
-    return total;
+    return this.items.reduce((total, item) => total + (item.price || 0), 0);
   }
 
   getItemsCount(): number {

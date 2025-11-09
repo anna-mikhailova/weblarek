@@ -1,73 +1,65 @@
-import { Card } from "../base/Card";
-import { IEvents } from "../base/Events";
-import { IPreviewCard, IPreviewCardData } from "../../types";
+import { Card } from "../uibase/Card";
+import { categoryMap } from "../../utils/constants";
+import { IPreviewCard, IPreviewCardData, ICardActions } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 export class PreviewCard
   extends Card<IPreviewCardData>
   implements IPreviewCard
 {
-  protected buttonElement: HTMLButtonElement | null;
-  protected descriptionElement: HTMLElement | null;
+  protected buttonElement: HTMLButtonElement;
+  protected descriptionElement: HTMLElement;
+  protected categoryElement: HTMLElement;
+  protected imageElement: HTMLImageElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {
+  constructor(container: HTMLElement, actions?: ICardActions) {
     super(container);
-    this.buttonElement = this.container.querySelector(".card__button");
-    this.descriptionElement = this.container.querySelector(".card__text");
 
-    this.buttonElement?.addEventListener("click", (event) => {
-      event.stopPropagation();
+    this.buttonElement = ensureElement<HTMLButtonElement>(
+      ".card__button",
+      this.container
+    );
+    this.descriptionElement = ensureElement<HTMLElement>(
+      ".card__text",
+      this.container
+    );
+    this.categoryElement = ensureElement<HTMLElement>(
+      ".card__category",
+      this.container
+    );
+    this.imageElement = ensureElement<HTMLImageElement>(
+      ".card__image",
+      this.container
+    );
 
-      // Если товар недоступен (цена 0), ничего не делаем
-      if (this.container.dataset.price === "0") {
-        return;
-      }
-      if (this.container.dataset.inBasket === "true") {
-        this.events.emit("basket:remove", { id: this.container.dataset.id });
-      } else {
-        this.events.emit("card:addToBasket", { id: this.container.dataset.id });
-      }
-    });
-  }
-
-  set id(value: string) {
-    this.container.dataset.id = value;
+    if (actions?.onPreviewCardBasketClick) {
+      this.buttonElement?.addEventListener(
+        "click",
+        actions.onPreviewCardBasketClick
+      );
+    }
   }
 
   set description(value: string) {
-    if (this.descriptionElement) {
-      this.descriptionElement.textContent = value;
-    }
+    this.descriptionElement.textContent = value;
   }
 
-  set inBasket(value: boolean) {
-    this.container.dataset.inBasket = value.toString();
-    this.updateButton();
+  set category(value: string) {
+    this.categoryElement.textContent = value;
+    const className =
+      (categoryMap as Record<string, string>)[value] || categoryMap["другое"];
+    this.categoryElement.className = `card__category ${className}`;
   }
 
-  set price(value: number) {
-    super.price = value;
-    this.container.dataset.price = value.toString();
-    this.updateButton();
+  set image(value: { src: string; alt: string }) {
+    this.setImage(this.imageElement, value.src, value.alt);
   }
 
-  private updateButton() {
-    if (!this.buttonElement) return;
+  set buttonText(value: string) {
+    this.buttonElement.textContent = value;
+  }
 
-    const price = Number(this.container.dataset.price);
-    const inBasket = this.container.dataset.inBasket === "true";
-
-    if (price === 0) {
-      // Товар недоступен
-      this.buttonElement.textContent = "Недоступно";
-      this.buttonElement.disabled = true;
-    } else if (inBasket) {
-      // Товар уже в корзине
-      this.buttonElement.textContent = "Удалить из корзины";
-      this.buttonElement.disabled = false;
-    } else {
-      // Товар доступен для добавления
-      this.buttonElement.textContent = "В корзину";
-      this.buttonElement.disabled = false;
-    }
+  set buttonDisabledOption(value: boolean) {
+    this.buttonElement.disabled = value;
   }
 }

@@ -1,39 +1,39 @@
-import { IBuyer, ValidationResult } from '../../types';
+import { IBuyerModel, IBuyer, ValidationResult } from "../../types";
+import { IEvents } from "../base/Events";
 
-export class Buyer {
-  private payment: 'online' | 'upon receipt' | undefined;
+export class Buyer implements IBuyerModel {
+  private payment: "card" | "cash" | undefined;
   private email: string;
   private phone: string;
   private address: string;
+  private events: IEvents;
 
-  constructor() {
+  constructor(events: IEvents) {
     this.payment = undefined;
-    this.email = '';
-    this.phone = '';
-    this.address = '';
+    this.email = "";
+    this.phone = "";
+    this.address = "";
+    this.events = events;
   }
 
-  setPayment(payment: 'online' | 'upon receipt'): void {
+  setPayment(payment: "card" | "cash"): void {
     this.payment = payment;
+    this.events.emit("buyerModel:setPayment");
   }
 
   setEmail(email: string): void {
     this.email = email;
+    this.events.emit("buyerModel:setEmail");
   }
 
   setPhone(phone: string): void {
     this.phone = phone;
+    this.events.emit("buyerModel:setPhone");
   }
 
   setAddress(address: string): void {
     this.address = address;
-  }
-
-  setAllData(payment: 'online' | 'upon receipt', email: string, phone: string, address: string): void {
-    this.payment = payment;
-    this.email = email;
-    this.phone = phone;
-    this.address = address;
+    this.events.emit("buyerModel:setAddress");
   }
 
   getData(): IBuyer {
@@ -41,43 +41,35 @@ export class Buyer {
       payment: this.payment,
       email: this.email,
       phone: this.phone,
-      address: this.address
+      address: this.address,
     };
   }
 
   clear(): void {
     this.payment = undefined;
-    this.email = '';
-    this.phone = '';
-    this.address = '';
+    this.email = "";
+    this.phone = "";
+    this.address = "";
   }
 
   validate(): ValidationResult {
     const errors: ValidationResult = {};
 
     if (!this.payment) {
-      errors.payment = 'Не выбран вид оплаты';
+      errors.payment = "Не выбран вид оплаты";
     }
 
     if (!this.email) {
-      errors.email = 'Укажите email';
-    } else if (!this.isValidEmail(this.email)) {
-      errors.email = 'Некорректный формат email';
+      errors.email = "Укажите email";
     }
 
     if (!this.phone) {
-      errors.phone = 'Укажите телефон';
+      errors.phone = "Укажите телефон";
     }
 
     if (!this.address) {
-      errors.address = 'Укажите адрес';
+      errors.address = "Укажите адрес";
     }
-
     return errors;
-  }
-
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 }

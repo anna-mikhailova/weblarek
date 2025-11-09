@@ -10,6 +10,12 @@ export interface IApi {
   ): Promise<T>;
 }
 
+export interface IWebLarekApi {
+  getProductList(): Promise<IProduct[]>;
+  postOrder(order: IOrder): Promise<OrderResult>;
+  getFullImageUrl(imagePath: string): string;
+}
+
 // Модели данных
 export interface IProduct {
   id: string;
@@ -21,7 +27,7 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-  payment: "online" | "upon receipt" | undefined;
+  payment: "card" | "cash" | undefined;
   email: string;
   phone: string;
   address: string;
@@ -30,6 +36,35 @@ export interface IBuyer {
 export interface IOrder extends IBuyer {
   total: number;
   items: string[];
+}
+
+// Интерфейсы классов моделей
+export interface IBasketModel {
+  getItems(): IProduct[];
+  addItem(product: IProduct): void;
+  removeItem(productId: string): void;
+  clear(): void;
+  getTotalPrice(): number;
+  getItemsCount(): number;
+  contains(productId: string): boolean;
+}
+
+export interface IBuyerModel {
+  setPayment(payment: 'card' | 'cash'): void;
+  setEmail(email: string): void;
+  setPhone(phone: string): void;
+  setAddress(address: string): void;
+  getData(): IBuyer;
+  clear(): void;
+  validate(): ValidationResult;
+}
+
+export interface IProductListModel {
+  setProducts(products: IProduct[]): void;
+  getProducts(): IProduct[];
+  getProductById(id: string): IProduct | undefined;
+  setSelectedProduct(product: IProduct | null): void;
+  getSelectedProduct(): IProduct | null;
 }
 
 // Результаты операций
@@ -51,14 +86,13 @@ export interface IComponent<T = any> {
 }
 
 export interface IForm<T = any> extends IComponent<T> {
-  set valid(value: boolean);
-  set errors(value: string[]);
+  set errors(value: string);
+  set buttonText(value:string);
+  set buttonDisabledOption(value:boolean);
 }
 
 export interface ICard<T = any> extends IComponent<T> {
-  set category(value: string);
   set title(value: string);
-  set image(value: { src: string; alt: string });
   set price(value: number);
 }
 
@@ -67,32 +101,33 @@ export interface ICard<T = any> extends IComponent<T> {
 export interface ICatalogCardData
   extends Pick<IProduct, "id" | "category" | "title" | "price"> {
   image: { src: string; alt: string };
-  inBasket?: boolean;
+  //inBasket?: boolean;
 }
 
 export interface IPreviewCardData
   extends Pick<
     IProduct,
-    "id" | "category" | "title" | "description" | "price"
+    "category" | "title" | "description" | "price"
   > {
   image: { src: string; alt: string };
-  inBasket?: boolean;
+  buttonText: string;
+  buttonDisabledOption: boolean;
 }
 
 export interface IBasketCardData
-  extends Pick<IProduct, "id" | "title" | "price"> {
+  extends Pick<IProduct, "title" | "price"> {
   index: number;
 }
 
 // Данные для форм
 export interface IOrderFormData extends Pick<IBuyer, "payment" | "address"> {
-  valid: boolean;
-  errors: string[];
+  errors: string;
+  buttonDisabledOption: boolean;
 }
 
 export interface IContactsFormData extends Pick<IBuyer, "email" | "phone"> {
-  valid: boolean;
-  errors: string[];
+  errors: string;
+  buttonDisabledOption: boolean;
 }
 
 // Данные для UI компонентов
@@ -117,22 +152,26 @@ export interface IGalleryData {
 // Конкретные интерфейсы компонентов:
 // Карточки
 export interface ICatalogCard extends ICard<ICatalogCardData> {
-  set id(value: string);
+  set category(value: string);
+  set image(value: { src: string; alt: string });
 }
 
 export interface IPreviewCard extends ICard<IPreviewCardData> {
-  set id(value: string);
+  set category(value: string);
+  set image(value: { src: string; alt: string });
   set description(value: string);
-  set inBasket(value: boolean);
+  set buttonText(value:string);
+  set buttonDisabledOption(value:boolean);
 }
 
 export interface IBasketCard extends ICard<IBasketCardData> {
-  set id(value: string);
   set index(value: number);
 }
 
 // Формы
-export interface IOrderForm extends IForm<IOrderFormData> {}
+export interface IOrderForm extends IForm<IOrderFormData> {
+  set payment(value: string);
+}
 
 export interface IContactsForm extends IForm<IContactsFormData> {}
 
@@ -146,7 +185,13 @@ export interface IBasketView extends IComponent<IBasketData> {}
 export interface ISuccess extends IComponent<ISuccessData> {}
 
 export interface IModal {
-  open(content?: HTMLElement): void;
-  close(): void;
-  setContent(content: HTMLElement): void;
+  set content(content: HTMLElement);
+  set isOpen(value: boolean);
+}
+
+// Интерфейсы для действий карточек
+export interface ICardActions {
+  onCatalogCardClick?: (event: MouseEvent) => void;
+  onPreviewCardBasketClick?: (event: MouseEvent) => void;
+  onRemoveFromBasket?: (event: MouseEvent) => void;
 }

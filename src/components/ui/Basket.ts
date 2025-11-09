@@ -1,18 +1,28 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { formatPriceForBasket } from "../../utils/format";
+import { ensureElement } from "../../utils/utils";
 import { IBasketView, IBasketData } from "../../types";
 
 export class Basket extends Component<IBasketData> implements IBasketView {
-  private listElement: HTMLElement | null;
-  private totalElement: HTMLElement | null;
-  private buttonElement: HTMLButtonElement | null;
+  private listElement: HTMLElement;
+  private totalElement: HTMLElement;
+  private buttonElement: HTMLButtonElement;
 
   constructor(container: HTMLElement, private events: IEvents) {
     super(container);
-    this.listElement = this.container.querySelector(".basket__list");
-    this.totalElement = this.container.querySelector(".basket__price");
-    this.buttonElement = this.container.querySelector(".basket__button");
+    this.listElement = ensureElement<HTMLElement>(
+      ".basket__list",
+      this.container
+    );
+    this.totalElement = ensureElement<HTMLElement>(
+      ".basket__price",
+      this.container
+    );
+    this.buttonElement = ensureElement<HTMLButtonElement>(
+      ".basket__button",
+      this.container
+    );
 
     this.buttonElement?.addEventListener("click", () => {
       if (!this.buttonElement?.disabled) {
@@ -22,26 +32,14 @@ export class Basket extends Component<IBasketData> implements IBasketView {
   }
 
   set items(value: HTMLElement[]) {
-    if (this.listElement) {
-      this.listElement.replaceChildren(...value);
-    }
+    this.listElement.replaceChildren(...value);
   }
 
   set total(value: number) {
-    if (this.totalElement) {
-      this.totalElement.textContent = formatPriceForBasket(value);
-    }
+    this.totalElement.textContent = formatPriceForBasket(value);
   }
 
   set disabled(value: boolean) {
-    if (this.buttonElement) {
-      this.buttonElement.disabled = value;
-
-      if (value) {
-        this.buttonElement.classList.add("button_disabled");
-      } else {
-        this.buttonElement.classList.remove("button_disabled");
-      }
-    }
+    this.buttonElement.disabled = value;
   }
 }
